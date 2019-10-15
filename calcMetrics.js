@@ -64,7 +64,7 @@ query {
       const prCalc = [comments, reviews, reviewComments].reduce((acc, commentsArray) => {
           acc.design += calculateNumberOf(commentsArray, '🎨');
           acc.functional += calculateNumberOf(commentsArray, '🐛');
-          acc.requirement += calculateNumberOf(commentsArray, '👍');
+          acc.requirement += calculateNumberOf(commentsArray, '📚');
           acc.coding += calculateNumberOf(commentsArray, '💅');
           return acc;
       }, { design: 0, functional: 0, requirement:0, coding:0 });
