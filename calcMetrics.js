@@ -53,7 +53,13 @@ query {
 `
     }
   }).then(result => {
-    console.log('      Design  Functional  Requirement  Coding');
+    const columns = [
+      { key: 'Design', emoji: '🎨' },
+      { key: 'Functional', emoji: '🐛' },
+      { key: 'Requirement', emoji: '📚'},
+      { key: 'Coding', emoji: '💅'},
+    ];
+    console.log('      ' + columns.map(({key}) => key).join(' '));
     const pullRequests = result.data.data.repository.milestone.pullRequests.edges;
     pullRequests.map(pr => {
       const comments = pr.node.comments.edges;
@@ -62,13 +68,12 @@ query {
       const reviewComments = reviewThreads.reduce((acc, thread) => [...acc, ...thread.node.comments.edges], []);
 
       const prCalc = [comments, reviews, reviewComments].reduce((acc, commentsArray) => {
-          acc.design += calculateNumberOf(commentsArray, '🎨');
-          acc.functional += calculateNumberOf(commentsArray, '🐛');
-          acc.requirement += calculateNumberOf(commentsArray, '📚');
-          acc.coding += calculateNumberOf(commentsArray, '💅');
+          columns.map(({key, emoji}) => {
+            acc[key] += calculateNumberOf(commentsArray, emoji);
+          });
           return acc;
-      }, { design: 0, functional: 0, requirement:0, coding:0 });
-      console.log(`${pr.node.number}    ${prCalc.design}         ${prCalc.functional}           ${prCalc.requirement}           ${prCalc.coding}`);
+      }, columns.reduce((accumulator, { key }) => ({ ...accumulator, [key]: 0}), {}));
+      console.log(`${pr.node.number}     ` + columns.map(({key}) => `${prCalc[key]}`.padEnd(key.length)).join(' '));
     });
   }, error => {
     console.log(error);
