@@ -16,6 +16,8 @@ query {
                 node {
                    title
                    number
+                   additions
+                   deletions
                    comments(first: 50) {
                     edges {
                         node {
@@ -59,7 +61,7 @@ query {
       { key: 'Requirement', emoji: '📚'},
       { key: 'Coding', emoji: '💅'},
     ];
-    console.log('      ' + columns.map(({key}) => key).join(' '));
+    console.log(`      ${columns.map(({key}) => key).join(' ')} Size       Title`);
     const pullRequests = result.data.data.repository.milestone.pullRequests.edges;
     pullRequests.map(pr => {
       const comments = pr.node.comments.edges;
@@ -73,7 +75,9 @@ query {
           });
           return acc;
       }, columns.reduce((accumulator, { key }) => ({ ...accumulator, [key]: 0}), {}));
-      console.log(`${pr.node.number}     ` + columns.map(({key}) => `${prCalc[key]}`.padEnd(key.length)).join(' '));
+      const columnsDataPrint = columns.map(({key}) => `${prCalc[key]}`.padEnd(key.length)).join(' ');
+      const prSize = `+${pr.node.additions}/-${pr.node.deletions}`.padEnd(10);
+      console.log(`${pr.node.number}  ${columnsDataPrint} ${prSize} ${pr.node.title}`);
     });
   }, error => {
     console.log(error);
