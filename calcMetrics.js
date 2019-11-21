@@ -1,5 +1,7 @@
 const axios = require("axios");
 const moment = require("moment");
+const importJsx = require('import-jsx');
+const table = importJsx('./table');
 
 const getPullRequestsData = (projectName, githubToken, sprint) => axios({
     url: 'https://api.github.com/graphql',
@@ -61,11 +63,10 @@ query {
       { key: 'Requirement', emoji: '📚'},
       { key: 'Coding', emoji: '💅'},
     ];
-    console.log(`      ${columns.map(({key}) => key).join(' ')} Size       Title`);
-    if (!result.data.data.repository) console.log(result.data.errors);
+    if (!result.data.data.repository) console.error(result.data.errors);
     const pullRequests = result.data.data.repository.pullRequests.edges;
     if (!pullRequests) console.log(result.data.data);
-    pullRequests.filter(pr => (
+    const data = pullRequests.filter(pr => (
       moment(pr.node.mergedAt).isSameOrBefore(moment(sprint.endDate)) && 
       moment(pr.node.mergedAt).isSameOrAfter(moment(sprint.endDate).subtract(sprint.lengthDays, 'day'))
     )).map(pr => {
@@ -80,12 +81,17 @@ query {
           });
           return acc;
       }, columns.reduce((accumulator, { key }) => ({ ...accumulator, [key]: 0}), {}));
-      const columnsDataPrint = columns.map(({key}) => `${prCalc[key]}`.padEnd(key.length)).join(' ');
-      const prSize = `+${pr.node.additions}/-${pr.node.deletions}`.padEnd(10);
-      console.log(`${String(pr.node.number).padEnd(4)}  ${columnsDataPrint} ${prSize} ${pr.node.title}`);
+
+      return {
+        '#': `#${pr.node.number}`,
+        ...prCalc,
+        Size: `+${pr.node.additions}/-${pr.node.deletions}`.padEnd(10),
+        Title: pr.node.title,
+      };
     });
+    table.printTable(data);
   }, error => {
-    console.log(error);
+    console.error(error);
 });
 
 const calculateNumberOf = (commentsArray, emoji) => commentsArray.reduce((acc, comment) => acc + comment.node.bodyText.split(emoji).length - 1, 0);
