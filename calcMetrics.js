@@ -60,6 +60,7 @@ query {
       { key: 'Functional', emoji: '🐛' },
       { key: 'Requirement', emoji: '📚'},
       { key: 'Coding', emoji: '💅'},
+      { key: 'Comments', emoji: ''},
     ];
     console.log(`      ${columns.map(({key}) => key).join(' ')} Size       Title`);
     if (!result.data.data.repository) console.log(result.data.errors);
@@ -80,6 +81,7 @@ query {
           });
           return acc;
       }, columns.reduce((accumulator, { key }) => ({ ...accumulator, [key]: 0}), {}));
+      prCalc['Comments'] = [...comments, ...reviews, ...reviewComments].length;
       const columnsDataPrint = columns.map(({key}) => `${prCalc[key]}`.padEnd(key.length)).join(' ');
       const prSize = `+${pr.node.additions}/-${pr.node.deletions}`.padEnd(10);
       console.log(`${String(pr.node.number).padEnd(4)}  ${columnsDataPrint} ${prSize} ${pr.node.title}`);
